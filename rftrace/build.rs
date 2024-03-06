@@ -53,26 +53,28 @@ fn build_backend() {
     cmd.arg("build");
 
     // Compile for the same target as the parent-lib
-    cmd.args(&["--target", &target]);
+    cmd.args(["--target", &target]);
 
     // Output all build artifacts in output dir of parent-lib
-    cmd.args(&["--target-dir", &full_target_dir]);
+    cmd.args(["--target-dir", &full_target_dir]);
 
     // Use custom manifest, which defines that this compilation is a staticlib
     // crates.io allows only one Cargo.toml per package, so copy here
     let manifest =
         prepare_staticlib_toml(&out_dir).expect("Could not prepare staticlib toml file!");
-    cmd.args(&["--manifest-path", &manifest]);
+    cmd.args(["--manifest-path", &manifest]);
 
     // Enable the staticlib feature, so we can do #[cfg(feature='staticlib')] gate our code
     // Pass-through interruptsafe and reexportsymbols features
-    let mut features = "staticlib".to_owned();
-    #[cfg(feature = "interruptsafe")]
-    features.push_str(",interruptsafe");
-    cmd.args(&["--features", &*features]);
+    let features = if cfg!(feature = "interruptsafe") {
+        "staticlib,interruptsafe"
+    } else {
+        "staticlib"
+    };
+    cmd.args(["--features", features]);
 
     // Always output color, so eventhough we are cargo-in-cargo, we get nice error messages on build fail
-    cmd.args(&["--color", "always"]);
+    cmd.args(["--color", "always"]);
 
     // Be very verbose
     //cmd.arg("-vv");
@@ -84,7 +86,7 @@ fn build_backend() {
     // Build core, needed when compiling against a kernel-target, such as x86_64-unknown-none-hermitkernel.
     // parent's cargo does NOT expose -Z flags as envvar, we therefore use a feature flag for this
     #[cfg(feature = "buildcore")]
-    cmd.args(&["-Z", "build-std=core"]); // should be build std,alloc?
+    cmd.args(["-Z", "build-std=core"]); // should be build std,alloc?
 
     // Compile staticlib as release if included in release build.
     if profile == "release" {

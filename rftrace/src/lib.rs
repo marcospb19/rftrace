@@ -2,7 +2,6 @@
 //! Provides an `mcount` implementation, which does nothing by default but can be enabled via frontend.
 //! A lot of documentation can be found in the parent workspaces [readme](https://github.com/tlambertz/rftrace).
 
-#![feature(asm)]
 #![feature(naked_functions)]
 #![feature(thread_local)]
 #![feature(linkage)]

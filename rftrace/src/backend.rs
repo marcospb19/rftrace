@@ -1,4 +1,4 @@
-use core::arch::x86_64::_rdtsc;
+use core::arch::{asm, x86_64::_rdtsc};
 use core::slice;
 use core::sync::atomic::{AtomicBool, AtomicU64, AtomicUsize, Ordering};
 
@@ -179,7 +179,9 @@ pub extern "C" fn mcount_entry(parent_ret: *mut *const usize, child_ret: *const 
             }
 
             // TODO: clean up this hack! we check if we are in mcount, or mcount_entry, mcount_return_tampoline or mcount_return
-            if parent_ret_deref >= (mcount as *const usize) && parent_ret_deref <= (rftrace_backend_get_events_index as *const usize) {
+            if parent_ret_deref >= (mcount as *const usize)
+                && parent_ret_deref <= (rftrace_backend_get_events_index as *const usize)
+            {
                 /*unsafe {
                     *(0 as *mut u8) = 0;
                 }
@@ -196,12 +198,11 @@ pub extern "C" fn mcount_entry(parent_ret: *mut *const usize, child_ret: *const 
                     }
 
                     events[cidx % events.len()] = Event::Exit(Exit {
-                        time: _rdtsc()+20,
+                        time: _rdtsc() + 20,
                         from: child_ret,
                         tid,
                     });
                 }
-
 
                 return;
             }
